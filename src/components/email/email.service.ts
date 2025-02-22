@@ -51,7 +51,6 @@ export class EmailService {
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       sendpulse.init(CONFIG.SENDPULSE.USER_ID, CONFIG.SENDPULSE.SECRET, '/tmp/', () => {
-        console.log(CONFIG.SENDPULSE.SENDER_EMAIL);
         const emailData = {
           subject,
           html: message,

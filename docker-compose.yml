@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: garden
       POSTGRES_PASSWORD: 123postgres
-      POSTGRES_DB: garden-dev
+      POSTGRES_DB: recruiter-dev
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:

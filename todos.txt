@@ -1,0 +1,4 @@
+cannot delete questions if they take a part of prescreens
+percents of prescreens
+mark candidates as ready to next steps
+add indexes to tables

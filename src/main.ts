@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 import CONFIG from '@config';
 import { ExceptionsFilter, SwaggerInit } from '@core';
 
-const { PORT, CORS_ALLOWED_ORIGINS } = CONFIG.APP;
+const { PORT, HOST, CORS_ALLOWED_ORIGINS } = CONFIG.APP;
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
@@ -18,6 +18,9 @@ async function bootstrap() {
     }),
   );
   SwaggerInit(app);
-  await app.listen(PORT, () => Logger.log(`Server is listening on port ${PORT}`));
+  await app.listen(PORT, HOST, () => {
+    Logger.log(`Server is listening on http://${HOST}:${PORT}`);
+    Logger.log(`Swagger documentation is available at http://${HOST}:${PORT}/api`);
+  });
 }
 bootstrap();

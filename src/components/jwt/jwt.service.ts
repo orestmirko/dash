@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import CONFIG from '@config';
-import { UserEntity, AdminEntity } from '@entities';
+import { RecruiterEntity } from '@entities';
 import { JwtException } from '@exceptions';
 
 @Injectable()
 export class CustomJwtService {
   constructor(private readonly nestJwtService: NestJwtService) {}
 
-  async generateTokens(user: UserEntity | AdminEntity) {
-    const isAdmin = user instanceof AdminEntity;
+  async generateTokens(recruiter: RecruiterEntity) {
     const payload = {
-      sub: user.id,
-      role: isAdmin ? 'admin' : 'user',
-      ...(isAdmin ? { email: (user as AdminEntity).email } : { phone: (user as UserEntity).phone }),
+      sub: recruiter.id,
+      role: recruiter.role,
+      email: recruiter.email,
     };
 
     const [accessToken, refreshToken] = await Promise.all([

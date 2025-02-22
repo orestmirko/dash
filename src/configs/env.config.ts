@@ -8,7 +8,9 @@ dotenv.config({
 export const config: CONFIG_TYPES = {
   APP: {
     PORT: parseInt(process.env.APP_PORT || '8000', 10),
+    HOST: process.env.APP_HOST || '0.0.0.0',
     CORS_ALLOWED_ORIGINS: process.env.APP_CORS_ORIGINS?.split(',') || ['*'],
+    FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
   },
   DATABASE: {
     TYPE: process.env.DATABASE_TYPE || 'postgres',
@@ -41,8 +43,9 @@ export const config: CONFIG_TYPES = {
     SENDER_NAME: process.env.SENDPULSE_SENDER_NAME,
     SENDER_EMAIL: process.env.SENDPULSE_SENDER_EMAIL,
   },
-  ADMIN: {
-    SUPER_ADMIN_KEY: process.env.SUPER_ADMIN_KEY,
+  SECURITY: {
+    MAX_LOGIN_ATTEMPTS: parseInt(process.env.SECURITY_MAX_LOGIN_ATTEMPTS || '5', 10),
+    BLOCK_DURATION_SECONDS: parseInt(process.env.SECURITY_BLOCK_DURATION_SECONDS || '900', 10),
   },
 };
 

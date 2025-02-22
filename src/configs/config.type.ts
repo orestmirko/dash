@@ -1,7 +1,9 @@
-export type CONFIG_TYPES = {
+export interface CONFIG_TYPES {
   APP: {
     PORT: number;
+    HOST: string;
     CORS_ALLOWED_ORIGINS: string[];
+    FRONTEND_URL: string;
   };
   DATABASE: {
     TYPE: string;
@@ -34,7 +36,8 @@ export type CONFIG_TYPES = {
     SENDER_NAME: string;
     SENDER_EMAIL: string;
   };
-  ADMIN: {
-    SUPER_ADMIN_KEY: string;
+  SECURITY: {
+    MAX_LOGIN_ATTEMPTS: number;
+    BLOCK_DURATION_SECONDS: number;
   };
-};
+}

@@ -1,2 +1,4 @@
-export * from './user.repository';
-export * from './product.repository';
+export * from './question-list.repository';
+export * from './question.repository';
+export * from './vacancy.repository';
+export * from './question-pool.repository';

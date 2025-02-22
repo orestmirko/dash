@@ -1,19 +1,19 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '@core';
-import { AdminModule, StoreModule, UserModule } from '@modules';
+import { CompanyManagementModule, AuthModule, OnboardingModule, VacancyModule, QuestionModule } from '@modules';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronTaskModule } from './cron';
-import { ProductModule } from './components/product/product.module';
 
 @Module({
   imports: [
     DatabaseModule,
     CronTaskModule,
     ScheduleModule.forRoot(),
-    AdminModule,
-    UserModule,
-    StoreModule,
-    ProductModule,
+    OnboardingModule,
+    AuthModule,
+    CompanyManagementModule,
+    VacancyModule,
+    QuestionModule,
   ],
 })
 export class AppModule {}

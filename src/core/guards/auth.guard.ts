@@ -2,9 +2,10 @@ import { Injectable, ExecutionContext, UnauthorizedException, SetMetadata } from
 import { CanActivate } from '@nestjs/common';
 import { CustomJwtService } from '@providers';
 import { RedisService } from '../cache/redis.service';
+import { RecruiterRole } from '@enums';
 
 export const ROLES_KEY = 'roles';
-export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
+export const Roles = (...roles: RecruiterRole[]) => SetMetadata(ROLES_KEY, roles);
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -15,13 +16,13 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers.authorization;
+    const authHeader = request.headers.authorization || request.headers.Authorization;
 
     if (!authHeader) {
       throw new UnauthorizedException('Authorization is required');
     }
 
-    const [bearer, token] = authHeader.split(' ');
+    const [bearer, token] = authHeader.toString().split(' ');
 
     if (bearer !== 'Bearer' || !token) {
       throw new UnauthorizedException('Invalid authorization header format');
@@ -29,10 +30,7 @@ export class AuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAccessToken(token);
-
-      const sessionKey =
-        payload.role === 'admin' ? `admin_session:${payload.sub}` : `user_session:${payload.sub}`;
-
+      const sessionKey = this.getSessionKey(payload.sub, payload.role);
       const sessionExists = await this.redisService.exists(sessionKey);
 
       if (!sessionExists) {
@@ -41,13 +39,26 @@ export class AuthGuard implements CanActivate {
 
       const requiredRoles = Reflect.getMetadata(ROLES_KEY, context.getHandler());
       if (requiredRoles && !requiredRoles.includes(payload.role)) {
-        throw new UnauthorizedException(`${payload.role} access required`);
+        throw new UnauthorizedException(
+          `Role ${payload.role} is not authorized to access this resource`,
+        );
       }
 
       request.user = payload;
       return true;
     } catch (error) {
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException(error.message);
+    }
+  }
+
+  private getSessionKey(userId: number, role: RecruiterRole): string {
+    switch (role) {
+      case RecruiterRole.ADMIN:
+        return `recruiter_admin_session:${userId}`;
+      case RecruiterRole.FREELANCER:
+        return `recruiter_freelancer_session:${userId}`;
+      default:
+        return `recruiter_session:${userId}`;
     }
   }
 }
