@@ -16,6 +16,7 @@ Best regards,
 Recruiting Platform Team
     `.trim(),
   },
+
   COMPANY_CREATION: {
     SUBJECT: 'Welcome to Recruiting Platform',
     BODY: (companyName: string, adminName: string) =>
@@ -30,6 +31,7 @@ Best regards,
 Recruiting Platform Team
     `.trim(),
   },
+
   FREELANCER_REGISTRATION: {
     SUBJECT: 'Welcome to Recruiting Platform',
     BODY: (firstName: string) =>
@@ -43,5 +45,23 @@ You can now log in and start using all the features available to freelance recru
 Best regards,
 Recruiting Platform Team
     `.trim(),
+  },
+  
+  PRESCREEN_INVITATION: {
+    SUBJECT: 'Pre-screening Interview Invitation',
+    BODY: (candidateName: string, vacancyTitle: string, prescreenLink: string, expirationDate: Date) =>
+      `
+Hello ${candidateName},
+
+You have been invited to complete a pre-screening for the ${vacancyTitle} position.
+
+Please complete the pre-screening by clicking this link:
+${prescreenLink}
+
+This link will expire on ${expirationDate.toLocaleDateString()}.
+
+Best regards,
+Recruiting Platform Team
+      `.trim(),
   },
 };

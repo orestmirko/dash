@@ -26,58 +26,60 @@ export class OnboardingService {
     company: CompanyEntity;
     tokens: { accessToken: string; refreshToken: string };
   }> {
-    const existingCompany = await this.companyRepo.findOne({ where: { name: dto.name } });
+    const { admin: adminData, ...companyData } = dto;
+
+    const existingCompany = await this.companyRepo.findOne({ 
+      where: { 
+        name: companyData.name,
+        isVerified: true 
+      } 
+    });
+    
     if (existingCompany) {
-      throw new ConflictException(`Company with name "${dto.name}" already exists`);
+      throw new ConflictException(`Verified company with name "${companyData.name}" already exists`);
     }
 
     const existingRecruiter = await this.recruiterRepo.findOne({
-      where: { email: dto.admin.email },
+      where: { email: adminData.email },
     });
     if (existingRecruiter) {
-      throw new ConflictException(`Recruiter with email "${dto.admin.email}" already exists`);
+      throw new ConflictException(`Recruiter with email "${adminData.email}" already exists`);
     }
 
     let savedCompany: CompanyEntity;
     let savedAdmin: RecruiterEntity;
 
-    await this.companyRepo.manager.transaction(async (manager) => {
-      const company = manager.create(CompanyEntity, {
-        name: dto.name,
-        description: dto.description,
-        website: dto.website,
-        linkedinUrl: dto.linkedinUrl,
-        logoUrl: dto.logoUrl,
-        companySize: dto.companySize,
-      });
-      savedCompany = await manager.save(company);
+    try {
+      await this.companyRepo.manager.transaction(async (manager) => {
+        const company = manager.create(CompanyEntity, companyData);
+        savedCompany = await manager.save(company);
 
-      const hashedPassword = await hashPassword(dto.admin.password);
-      const adminRecruiter = manager.create(RecruiterEntity, {
-        email: dto.admin.email,
-        firstName: dto.admin.firstName,
-        lastName: dto.admin.lastName,
-        passwordHash: hashedPassword,
-        imageUrl: dto.admin.imageUrl,
-        role: RecruiterRole.ADMIN,
-        company: savedCompany,
+        const hashedPassword = await hashPassword(adminData.password);
+        const adminRecruiter = manager.create(RecruiterEntity, {
+          ...adminData,
+          passwordHash: hashedPassword,
+          role: RecruiterRole.ADMIN,
+          company: savedCompany,
+        });
+        savedAdmin = await manager.save(adminRecruiter);
       });
-      savedAdmin = await manager.save(adminRecruiter);
-    });
+    } catch (error) {
+      throw new ConflictException('Failed to create company and admin: ' + error.message);
+    }
 
-    // Відправляємо email про успішне створення компанії
-    // await this.emailService.sendEmail(
-    //   dto.admin.email,
-    //   EMAIL_TEMPLATES.COMPANY_CREATION.SUBJECT,
-    //   EMAIL_TEMPLATES.COMPANY_CREATION.BODY(
+    // TODO: Uncomment after adding new email provider
+    // await this.emailService.sendEmail({
+    //   email: adminData.email,
+    //   subject: EMAIL_TEMPLATES.COMPANY_CREATION.SUBJECT,
+    //   message: EMAIL_TEMPLATES.COMPANY_CREATION.BODY(
     //     savedCompany.name,
-    //     dto.admin.firstName,
+    //     adminData.firstName,
     //   ),
-    // );
+    // });
 
     const tokens = await this.authService.login({
-      email: dto.admin.email,
-      password: dto.admin.password,
+      email: adminData.email,
+      password: adminData.password,
     });
 
     return {
@@ -87,7 +89,7 @@ export class OnboardingService {
   }
 
   public async registerFreelancer(dto: CreateFreelancerDto): Promise<{
-    freelancer: RecruiterEntity;
+    freelancer: Omit<RecruiterEntity, 'passwordHash'>;
     tokens: { accessToken: string; refreshToken: string };
   }> {
     const existingRecruiter = await this.recruiterRepo.findOne({ where: { email: dto.email } });
@@ -101,17 +103,20 @@ export class OnboardingService {
       firstName: dto.firstName,
       lastName: dto.lastName,
       passwordHash: hashedPassword,
-      imageUrl: dto.imageUrl,
+      avatarUrl: dto.avatarUrl,
       role: RecruiterRole.FREELANCER,
       company: null,
     });
     const savedFreelancer = await this.recruiterRepo.save(freelancerEntity);
 
-    // await this.emailService.sendEmail(
-    //   dto.email,
-    //   EMAIL_TEMPLATES.FREELANCER_REGISTRATION.SUBJECT,
-    //   EMAIL_TEMPLATES.FREELANCER_REGISTRATION.BODY(dto.firstName),
-    // );
+    const { passwordHash, ...freelancerResponse } = savedFreelancer;
+
+    // TODO: Uncomment after adding new email provider
+    // await this.emailService.sendEmail({
+    //   email: dto.email,
+    //   subject: EMAIL_TEMPLATES.FREELANCER_REGISTRATION.SUBJECT,
+    //   message: EMAIL_TEMPLATES.FREELANCER_REGISTRATION.BODY(dto.firstName),
+    // });
 
     const tokens = await this.authService.login({
       email: dto.email,
@@ -119,7 +124,7 @@ export class OnboardingService {
     });
 
     return {
-      freelancer: savedFreelancer,
+      freelancer: freelancerResponse,
       tokens,
     };
   }

@@ -20,7 +20,7 @@ import {
 import { AuthGuard, Roles } from '@guards';
 import { RecruiterRole } from '@enums';
 import { User } from '@decorators';
-import { CompanyManagementService } from './company-management.service';
+import { CompanyManagementService } from '@providers';
 
 @ApiTags('Company Management')
 @Controller('company-management')

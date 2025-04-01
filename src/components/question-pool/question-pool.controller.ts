@@ -64,4 +64,18 @@ export class QuestionPoolController {
   ) {
     return this.questionPoolService.getQuestionPoolById(recruiterId, poolId);
   }
+
+  @Post(':id/assign-to-vacancy/:vacancyId')
+  @ApiOperation({ summary: 'Assign question pool to vacancy' })
+  @ApiResponse({
+    status: 200,
+    description: 'Question pool assigned to vacancy successfully',
+  })
+  public assignToVacancy(
+    @User('sub') recruiterId: number,
+    @Param('id', ParseIntPipe) poolId: number,
+    @Param('vacancyId', ParseIntPipe) vacancyId: number,
+  ) {
+    return this.questionPoolService.assignToVacancy(recruiterId, poolId, vacancyId);
+  }
 }

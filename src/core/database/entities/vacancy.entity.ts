@@ -8,10 +8,11 @@ import {
   Index,
 } from 'typeorm';
 import { BaseEntity } from './base.entity';
-import { JobStatus, JobType, SeniorityLevel, WorkLocation } from 'src/enums/job.enum';
+import { JobStatus, JobType, SeniorityLevel, WorkLocation } from '../../../enums/job.enum';
 import { CompanyEntity } from './company.entity';
 import { RecruiterEntity } from './recruiter.entity';
 import { MinLength, MaxLength, Min } from 'class-validator';
+import { QuestionPoolEntity } from './question-pool.entity';
 
 @Entity('vacancies')
 export class VacancyEntity extends BaseEntity {
@@ -81,6 +82,13 @@ export class VacancyEntity extends BaseEntity {
   @Column({ nullable: true })
   experienceYears?: number;
 
+  @Column('jsonb', { nullable: true })
+  additionalMaterials?: Array<{
+    title: string;
+    description?: string;
+    url: string;
+  }>;
+
   @ManyToOne(() => CompanyEntity, (company) => company.vacancies, {
     onDelete: 'CASCADE',
     nullable: true,
@@ -96,10 +104,11 @@ export class VacancyEntity extends BaseEntity {
   })
   recruiters: RecruiterEntity[];
 
-  @Column('jsonb', { nullable: true })
-  additionalMaterials?: Array<{
-    title: string;
-    description?: string;
-    url: string;
-  }>;
+  @ManyToMany(() => QuestionPoolEntity)
+  @JoinTable({
+    name: 'vacancy_question_pools',
+    joinColumn: { name: 'vacancy_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'question_pool_id', referencedColumnName: 'id' },
+  })
+  questionPools: QuestionPoolEntity[];
 }

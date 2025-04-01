@@ -10,7 +10,7 @@ export class InviteRecruiterDto {
   @ApiProperty({ example: 'John' })
   @IsString()
   @Length(2, 50, { message: 'First name must be between 2 and 50 characters' })
-  @Matches(/^[а-яА-ЯёЁіІїЇєЄґҐa-zA-Z\s]*$/, {
+  @Matches(/^[\p{L}\s]*$/u, {
     message: 'First name can only contain letters and spaces',
   })
   public firstName: string;
@@ -18,7 +18,7 @@ export class InviteRecruiterDto {
   @ApiProperty({ example: 'Doe' })
   @IsString()
   @Length(2, 50, { message: 'Last name must be between 2 and 50 characters' })
-  @Matches(/^[а-яА-ЯёЁіІїЇєЄґҐa-zA-Z\s]*$/, {
+  @Matches(/^[\p{L}\s]*$/u, {
     message: 'Last name can only contain letters and spaces',
   })
   public lastName: string;

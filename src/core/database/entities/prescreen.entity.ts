@@ -2,6 +2,7 @@ import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { RecruiterEntity } from './recruiter.entity';
 import { PrescreenStatus } from '../../../enums/prescreen-status.enum';
+import { VacancyEntity } from './vacancy.entity';
 
 @Entity('prescreens')
 export class PrescreenEntity extends BaseEntity {
@@ -56,4 +57,8 @@ export class PrescreenEntity extends BaseEntity {
   @ManyToOne(() => RecruiterEntity, (recruiter) => recruiter.prescreens)
   @JoinColumn({ name: 'recruiter_id' })
   public recruiter: RecruiterEntity;
+
+  @ManyToOne(() => VacancyEntity)
+  @JoinColumn({ name: 'vacancy_id' })
+  public vacancy: VacancyEntity;
 }

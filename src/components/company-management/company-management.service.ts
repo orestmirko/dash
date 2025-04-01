@@ -146,14 +146,17 @@ export class CompanyManagementService {
 
     if (updateDto.name && updateDto.name !== company.name) {
       const conflict = await this.companyRepository.findOne({
-        where: { name: updateDto.name },
+        where: { 
+          name: updateDto.name,
+          isVerified: true 
+        },
       });
       if (conflict && conflict.id !== companyId) {
-        throw new ConflictException(`Company with name "${updateDto.name}" already exists`);
+        throw new ConflictException(`Verified company with name "${updateDto.name}" already exists`);
       }
     }
 
-    Object.assign(company, updateDto);
+    updateObjectFields(company, updateDto);
 
     const updatedCompany = await this.companyRepository.save(company);
     return updatedCompany;

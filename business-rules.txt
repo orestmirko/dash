@@ -1,0 +1,143 @@
+# Garden App Business Rules
+
+## Загальна концепція
+Recruiter - це платформа для автоматизації процесу прескрінінгу кандидатів при наймі. Основна мета - зробити процес найму більш ефективним, замінивши стандартний прескрін-дзвінок на структуровану анкету.
+
+## Ключові сутності
+
+### 1. Company (Компанія)
+- Базові поля:
+  * name (унікальна назва)
+  * isVerified (статус верифікації)
+  * description (опис компанії)
+  * website (веб-сайт)
+  * linkedinUrl (LinkedIn профіль)
+  * logoUrl (логотип)
+  * companySize (розмір компанії: enum)
+- Зв'язки:
+  * recruiters: OneToMany з Recruiter
+  * vacancies: OneToMany з Vacancy
+
+### 2. Recruiter (Рекрутер)
+- Базові поля:
+  * email (унікальний)
+  * firstName
+  * lastName
+  * passwordHash
+  * role (enum: ADMIN, RECRUITER, FREELANCER)
+  * avatarUrl
+- Зв'язки:
+  * company: ManyToOne з Company (null для фрілансерів)
+  * prescreens: OneToMany з Prescreen
+  * vacancies: ManyToMany з Vacancy
+
+### 3. Vacancy (Вакансія)
+- Базові поля:
+  * title
+  * description
+  * status (enum: DRAFT, ACTIVE, CLOSED, etc.)
+  * jobType (enum)
+  * seniority (enum)
+  * locationType (enum)
+  * location
+  * salaryRange (from/to + currency)
+  * responsibilities (array)
+  * requirements (array)
+  * skills (array)
+  * isHot (boolean)
+  * experienceYears
+  * additionalMaterials (JSON)
+- Зв'язки:
+  * company: ManyToOne з Company
+  * recruiters: ManyToMany з Recruiter
+  * questionPools: ManyToMany з QuestionPool
+
+### 4. Question (Питання)
+- Базові поля:
+  * type (enum: TEXT, MULTIPLE_CHOICE, VIDEO, CODE)
+  * text
+  * isRequired
+- Зв'язки:
+  * company: ManyToOne з Company
+  * createdBy: ManyToOne з Recruiter
+  * questionList: ManyToOne з QuestionList
+  * questionPool: ManyToOne з QuestionPool
+
+### 5. QuestionPool (Пул питань)
+- Базові поля:
+  * title
+  * description
+- Зв'язки:
+  * createdBy: ManyToOne з Recruiter
+  * questions: OneToMany з Question
+
+### 6. Prescreen (Прескрінінг)
+- Базові поля:
+  * candidateEmail
+  * candidateFirstName
+  * candidateLastName
+  * token (унікальний)
+  * expiresAt
+  * status (enum: NOT_STARTED, IN_PROGRESS, COMPLETED)
+- Зв'язки:
+  * recruiter: ManyToOne з Recruiter
+  * vacancy: ManyToOne з Vacancy
+
+Всі сутності успадковують від BaseEntity:
+- id: Primary Key
+- createdAt: дата створення
+- updatedAt: дата оновлення
+
+## Onboarding
+Система підтримує два шляхи онбордингу:
+
+### 1. Реєстрація компанії з адміністратором
+- Endpoint: POST /api/onboarding/company
+- Процес:
+  * Створення компанії та адміністратора відбувається в одній транзакції
+  * Перевірка унікальності назви компанії (серед верифікованих)
+  * Перевірка унікальності email адміністратора
+  * Хешування паролю адміністратора
+  * Створення записів в БД
+  * Генерація токенів доступу
+  * Відправка вітального email
+
+- Валідація компанії:
+  * Назва: обов'язкова, унікальна
+  * Опис: опціональний
+  * Веб-сайт: опціональний, валідний URL
+  * LinkedIn: опціональний, валідний URL
+  * Розмір компанії: enum (SMALL, MEDIUM, LARGE, ENTERPRISE)
+
+- Валідація адміністратора:
+  * Email: унікальний, валідний формат
+  * Ім'я/Прізвище: 2-50 символів, тільки літери
+  * Пароль: 8-20 символів, містить великі/малі літери, цифри, спецсимволи
+  * Аватар: опціональний URL
+
+### 2. Реєстрація фрілансера
+- Endpoint: POST /api/onboarding/freelancer
+- Процес:
+  * Перевірка унікальності email
+  * Хешування паролю
+  * Створення рекрутера з роллю FREELANCER
+  * Генерація токенів доступу
+  * Відправка вітального email
+
+- Валідація:
+  * Email: унікальний, валідний формат
+  * Ім'я/Прізвище: обов'язкові поля
+  * Пароль: мінімум 6 символів
+  * Аватар: опціональний URL
+
+### Результат онбордингу
+В обох випадках користувач отримує:
+- Дані створеного профілю (без хешу паролю)
+- Токени доступу (access + refresh)
+- Вітальний email (наразі функціонал закоментований)
+
+### Важливі особливості
+- Всі операції з створення компанії+адміна виконуються в транзакції
+- Паролі хешуються перед збереженням
+- Перевірка на унікальність email серед всіх рекрутерів
+- Перевірка на унікальність назви компанії тільки серед верифікованих компаній

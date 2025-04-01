@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { OnboardingService } from './onboarding.service';
 import { CreateCompanyWithAdminDto, CreateFreelancerDto } from '@dtos';
+import { OnboardingService } from '@providers';
 
 @ApiTags('Onboarding')
 @Controller('onboarding')

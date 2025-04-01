@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { QuestionPoolEntity } from './question-pool.entity';
-import { QuestionType } from '../../../enums';
+import { QuestionType } from '../../../enums/question-type.enum';
 import { QuestionListEntity } from './question-list.entity';
 import { CompanyEntity } from './company.entity';
 import { RecruiterEntity } from './recruiter.entity';

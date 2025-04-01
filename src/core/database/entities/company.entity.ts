@@ -2,19 +2,25 @@ import { Entity, Column, OneToMany, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { RecruiterEntity } from './recruiter.entity';
 import { VacancyEntity } from './vacancy.entity';
-import { CompanySize } from '@enums';
+import { CompanySize } from '../../../enums/company-size.enum';
 
 @Entity('companies')
 export class CompanyEntity extends BaseEntity {
   @Column({
     name: 'name',
     type: 'varchar',
-    length: 100,
+    length: 255,
     nullable: false,
-    unique: true,
   })
   @Index('IDX_COMPANY_NAME')
   public name: string;
+
+  @Column({
+    name: 'is_verified',
+    type: 'boolean',
+    default: false,
+  })
+  public isVerified: boolean;
 
   @Column({
     name: 'description',

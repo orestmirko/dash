@@ -1,5 +1,6 @@
+import { PrescreenExpirationPreset } from '@enums';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, Length, IsOptional, IsInt, Min, Max } from 'class-validator';
+import { IsEmail, IsString, Length, IsOptional, IsEnum, IsNumber, IsDate } from 'class-validator';
 
 export class CreatePrescreenDto {
   @ApiProperty({ example: 'john.doe@example.com' })
@@ -18,10 +19,17 @@ export class CreatePrescreenDto {
   @Length(2, 50, { message: 'Last name must be between 2 and 50 characters' })
   public candidateLastName?: string;
 
-  @ApiProperty({ example: 24, description: 'Link expiration time in hours' })
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  public vacancyId: number;
+
+  @ApiProperty({ enum: PrescreenExpirationPreset })
+  @IsEnum(PrescreenExpirationPreset)
   @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(168) // 1 week
-  public expirationHours?: number = 24;
+  public expirationPreset?: PrescreenExpirationPreset;
+
+  @ApiProperty({ example: '2024-04-01' })
+  @IsDate()
+  @IsOptional()
+  public expirationDate?: Date;
 }

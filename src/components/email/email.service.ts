@@ -2,6 +2,20 @@ import { Injectable, Logger } from '@nestjs/common';
 import { RedisService } from 'src/core/cache/redis.service';
 import * as sendpulse from 'sendpulse-api';
 import CONFIG from '@config';
+import { EMAIL_TEMPLATES } from '@constants';
+
+interface PrescreenInvitationData {
+  candidateName: string;
+  vacancyTitle: string;
+  prescreenLink: string;
+  expirationDate: Date;
+}
+
+interface ISendEmailParams {
+  email: string;
+  subject: string;
+  message: string;
+}
 
 @Injectable()
 export class EmailService {
@@ -9,8 +23,9 @@ export class EmailService {
 
   constructor(private readonly redisService: RedisService) {}
 
-  public async sendEmail(email: string, subject: string, message: string): Promise<void> {
+  public async sendEmail(data: ISendEmailParams): Promise<void> {
     try {
+      const { email, subject, message } = data;
       // Перевіряємо ліміт відправок на день
       const dailyAttemptsKey = `email_daily_attempts:${email}`;
       const dailyAttempts = await this.redisService.get(dailyAttemptsKey);
@@ -69,6 +84,22 @@ export class EmailService {
           return data.result ? resolve() : reject(data);
         }, emailData);
       });
+    });
+  }
+
+  public async sendPrescreenInvitation(
+    email: string,
+    data: PrescreenInvitationData,
+  ): Promise<void> {
+    await this.sendEmail({
+      email,
+      subject: EMAIL_TEMPLATES.PRESCREEN_INVITATION.SUBJECT,
+      message: EMAIL_TEMPLATES.PRESCREEN_INVITATION.BODY(
+        data.candidateName,
+        data.vacancyTitle,
+        data.prescreenLink,
+        data.expirationDate,
+      ),
     });
   }
 }

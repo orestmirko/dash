@@ -1,7 +1,7 @@
 import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RecruiterController } from './recruiter.controller';
-import { RecruiterService } from './recruiter.service';
+import { RecruiterController } from './prescreen.controller';
+import { RecruiterService } from './prescreen.service';
 import { PrescreenEntity } from '@entities';
 import { RedisModule } from 'src/core/cache/redis.module';
 import { EmailModule } from '../email/email.module';

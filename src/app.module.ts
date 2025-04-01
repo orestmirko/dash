@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '@core';
-import { CompanyManagementModule, AuthModule, OnboardingModule, VacancyModule, QuestionModule } from '@modules';
+import { CompanyManagementModule, AuthModule, OnboardingModule, VacancyModule, QuestionModule, QuestionListModule, QuestionPoolModule } from '@modules';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronTaskModule } from './cron';
 
@@ -14,6 +14,8 @@ import { CronTaskModule } from './cron';
     CompanyManagementModule,
     VacancyModule,
     QuestionModule,
+    QuestionListModule,
+    QuestionPoolModule,
   ],
 })
 export class AppModule {}

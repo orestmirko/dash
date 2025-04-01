@@ -20,5 +20,5 @@ export class CreateFreelancerDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  imageUrl?: string;
+  avatarUrl?: string;
 }

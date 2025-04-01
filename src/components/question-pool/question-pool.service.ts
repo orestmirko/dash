@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { QuestionPoolEntity, QuestionEntity, RecruiterEntity } from '@entities';
+import { QuestionPoolEntity, QuestionEntity, RecruiterEntity, VacancyEntity } from '@entities';
 import { CreateQuestionPoolDto, AddQuestionsToPoolDto, GetQuestionPoolsDto } from '@dtos';
 import { QuestionPoolRepository } from '@repositories';
 import { PaginatedResponse } from '@interfaces';
@@ -16,6 +16,8 @@ export class QuestionPoolService {
     private readonly questionRepository: Repository<QuestionEntity>,
     @InjectRepository(RecruiterEntity)
     private readonly recruiterRepository: Repository<RecruiterEntity>,
+    @InjectRepository(VacancyEntity)
+    private readonly vacancyRepository: Repository<VacancyEntity>,
     @InjectRepository(QuestionPoolRepository)
     private readonly questionPoolRepo: QuestionPoolRepository,
     private readonly logger: Logger,
@@ -192,6 +194,61 @@ export class QuestionPoolService {
       return questionPool;
     } catch (error) {
       this.logger.error(`Failed to get question pool: ${error.message}`);
+      throw error;
+    }
+  }
+
+  public async assignToVacancy(
+    recruiterId: number,
+    poolId: number,
+    vacancyId: number,
+  ): Promise<void> {
+    try {
+      const recruiter = await this.recruiterRepository.findOne({
+        where: { id: recruiterId },
+        relations: ['company'],
+      });
+
+      if (!recruiter) {
+        throw new NotFoundException('Recruiter not found');
+      }
+
+      const questionPool = await this.questionPoolRepository.findOne({
+        where: { id: poolId },
+        relations: ['createdBy'],
+      });
+
+      if (!questionPool) {
+        throw new NotFoundException('Question pool not found');
+      }
+
+      const vacancy = await this.vacancyRepository.findOne({
+        where: { id: vacancyId },
+        relations: ['questionPools', 'company'],
+      });
+
+      if (!vacancy) {
+        throw new NotFoundException('Vacancy not found');
+      }
+
+      if (recruiter.role !== RecruiterRole.ADMIN && vacancy.company.id !== recruiter.company?.id) {
+        throw new UnauthorizedException('You do not have permission to modify this vacancy');
+      }
+
+      if (!vacancy.questionPools) {
+        vacancy.questionPools = [];
+      }
+
+      if (vacancy.questionPools.some(pool => pool.id === poolId)) {
+        throw new BadRequestException('This question pool is already assigned to the vacancy');
+      }
+
+      vacancy.questionPools.push(questionPool);
+      await this.vacancyRepository.save(vacancy);
+
+      this.logger.log(`Assigned question pool ${poolId} to vacancy ${vacancyId}`);
+    } catch (error) {
+      this.logger.error(`Failed to assign question pool to vacancy: ${error.message}`);
       throw error;
     }
   }

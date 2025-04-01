@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { CreatePrescreenDto } from '@dtos';
 import { AuthGuard, Roles } from '@guards';
 import { User } from '@decorators';
-import { RecruiterService } from './recruiter.service';
+import { RecruiterService } from './prescreen.service';
 import { RecruiterRole } from '@enums';
 
 @ApiTags('Recruiter')

@@ -1,6 +1,6 @@
 export * from './company-management/company-management.controller';
 export * from './auth/auth.controller';
-export * from './recruiter/recruiter.controller';
+export * from './prescreen/prescreen.controller';
 export * from './question-list/question-list.controller';
 export * from './question/question.controller';
 export * from './question-pool/question-pool.controller';

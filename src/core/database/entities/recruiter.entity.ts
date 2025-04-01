@@ -19,7 +19,7 @@ export class RecruiterEntity extends BaseEntity {
   @Column({
     name: 'first_name',
     type: 'varchar',
-    length: 50,
+    length: 100,
     nullable: false,
   })
   public firstName: string;
@@ -27,7 +27,7 @@ export class RecruiterEntity extends BaseEntity {
   @Column({
     name: 'last_name',
     type: 'varchar',
-    length: 50,
+    length: 100,
     nullable: false,
   })
   public lastName: string;
@@ -44,7 +44,6 @@ export class RecruiterEntity extends BaseEntity {
     name: 'role',
     type: 'enum',
     enum: RecruiterRole,
-    default: RecruiterRole.RECRUITER,
     nullable: false,
   })
   public role: RecruiterRole;
@@ -55,7 +54,7 @@ export class RecruiterEntity extends BaseEntity {
     length: 255,
     nullable: true,
   })
-  public imageUrl?: string;
+  public avatarUrl?: string;
 
   @ManyToOne(() => CompanyEntity, (company) => company.recruiters, {
     onDelete: 'CASCADE',
